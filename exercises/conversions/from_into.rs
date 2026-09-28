@@ -40,10 +40,39 @@ impl Default for Person {
 // If while parsing the age, something goes wrong, then return the default of
 // Person Otherwise, then return an instantiated Person object with the results
 
-// I AM NOT DONE
+
 
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        if s.is_empty(){
+            return Person::default();
+        }
+        let mut parts =s.split(',');
+        let name =match parts.next(){
+            Some(n) if !n.is_empty() => n,
+            _ =>  return Person::default(),
+        };
+         let age_str = match parts.next() {
+            Some(a) => a, // 拿到了
+            None =>  return Person::default(), // 没拿到（比如 "Mark" 这种没逗号的情况）
+        };
+
+        // 5. 解析成 usize
+        let age = match age_str.parse::<usize>() {
+            Ok(a) => a, // 解析成功
+            Err(_) => return Person::default(), // 解析失败（比如 "twenty"）
+        };
+
+        // 6. 检查有没有多余的块（比如 "Mike,32,man" 这种尾随的额外内容）
+        if parts.next().is_some() {
+            return Person::default();
+        }
+
+        // 7. 全部过关，构造 Person 并返回
+        Person {
+            name: name.to_string(), // 因为字段类型是 String，而 name 是 &str，需要转换成 String
+            age,
+        }
     }
 }
 
